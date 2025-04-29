@@ -1,0 +1,111 @@
+import { AuditLog } from '../types';
+
+// Helper function to create timestamps within the last 7 days
+function getRandomTimestamp() {
+  const end = new Date();
+  const start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
+}
+
+export const mockAuditLogs: AuditLog[] = [
+  {
+    id: '1',
+    timestamp: getRandomTimestamp(),
+    userId: 'admin@nahcon.gov.ng',
+    userEmail: 'admin@nahcon.gov.ng',
+    userRole: 'Administrator',
+    action: 'User Creation',
+    category: 'user_management',
+    details: 'Created new State Representative account for Kano state',
+  },
+  {
+    id: '2',
+    timestamp: getRandomTimestamp(),
+    userId: 'staff@nahcon.gov.ng',
+    userEmail: 'staff@nahcon.gov.ng',
+    userRole: 'NAHCON Staff',
+    action: 'Meal Assessment',
+    category: 'meal_assessment',
+    details: 'Created new meal assessment for Ibn Umar accommodation',
+  },
+  {
+    id: '3',
+    timestamp: getRandomTimestamp(),
+    userId: 'fct@nahcon.gov.ng',
+    userEmail: 'fct@nahcon.gov.ng',
+    userRole: 'State Representative',
+    action: 'Assessment Review',
+    category: 'meal_assessment',
+    details: 'Approved meal assessment for Ava Kitchen delivery',
+  },
+  {
+    id: '4',
+    timestamp: getRandomTimestamp(),
+    userId: 'admin@nahcon.gov.ng',
+    userEmail: 'admin@nahcon.gov.ng',
+    userRole: 'Administrator',
+    action: 'Settings Update',
+    category: 'settings',
+    details: 'Updated system configuration for meal assessment criteria',
+  },
+  {
+    id: '5',
+    timestamp: getRandomTimestamp(),
+    userId: 'ava@kitchen.com',
+    userEmail: 'ava@kitchen.com',
+    userRole: 'Kitchen Representative',
+    action: 'Assessment Review',
+    category: 'meal_assessment',
+    details: 'Acknowledged meal assessment feedback for breakfast service',
+  },
+  {
+    id: '6',
+    timestamp: getRandomTimestamp(),
+    userId: 'admin@nahcon.gov.ng',
+    userEmail: 'admin@nahcon.gov.ng',
+    userRole: 'Administrator',
+    action: 'User Management',
+    category: 'user_management',
+    details: 'Deactivated inactive user accounts',
+  },
+  {
+    id: '7',
+    timestamp: getRandomTimestamp(),
+    userId: 'staff@nahcon.gov.ng',
+    userEmail: 'staff@nahcon.gov.ng',
+    userRole: 'NAHCON Staff',
+    action: 'Report Generation',
+    category: 'meal_assessment',
+    details: 'Generated monthly meal assessment report',
+  },
+  {
+    id: '8',
+    timestamp: getRandomTimestamp(),
+    userId: 'admin@nahcon.gov.ng',
+    userEmail: 'admin@nahcon.gov.ng',
+    userRole: 'Administrator',
+    action: 'System Access',
+    category: 'authentication',
+    details: 'Modified user access permissions',
+  },
+  {
+    id: '9',
+    timestamp: getRandomTimestamp(),
+    userId: 'fct@nahcon.gov.ng',
+    userEmail: 'fct@nahcon.gov.ng',
+    userRole: 'State Representative',
+    action: 'Assessment Review',
+    category: 'meal_assessment',
+    details: 'Rejected meal assessment due to quality concerns',
+  },
+  {
+    id: '10',
+    timestamp: getRandomTimestamp(),
+    userId: 'admin@nahcon.gov.ng',
+    userEmail: 'admin@nahcon.gov.ng',
+    userRole: 'Administrator',
+    action: 'Audit Review',
+    category: 'settings',
+    details: 'Reviewed system audit logs for compliance check',
+  },
+];

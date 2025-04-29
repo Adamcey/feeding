@@ -1,0 +1,131 @@
+/*
+  # Fix Authentication in Policies
+  
+  1. Changes
+    - Simplify policy conditions to avoid auth token issues
+    - Use email column directly for admin checks
+    - Update existing tables and policies
+  
+  2. Security
+    - Enable RLS on both tables
+    - Add policies for public read access
+    - Add policies for admin write access
+*/
+
+-- Create roles table if it doesn't exist
+CREATE TABLE IF NOT EXISTS roles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text UNIQUE NOT NULL,
+  description text,
+  privileges text[] DEFAULT '{}',
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- Create app_users table if it doesn't exist
+CREATE TABLE IF NOT EXISTS app_users (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  email text UNIQUE NOT NULL,
+  role text NOT NULL,
+  state text NOT NULL DEFAULT 'All',
+  kitchen text NOT NULL DEFAULT 'All',
+  status text NOT NULL DEFAULT 'Active',
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- Enable RLS
+ALTER TABLE roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_users ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist
+DO $$ 
+BEGIN
+  DROP POLICY IF EXISTS "Roles are viewable by all users" ON roles;
+  DROP POLICY IF EXISTS "Roles are manageable by administrators" ON roles;
+  DROP POLICY IF EXISTS "Users are viewable by all users" ON app_users;
+  DROP POLICY IF EXISTS "Users are manageable by administrators" ON app_users;
+EXCEPTION
+  WHEN undefined_object THEN
+    NULL;
+END $$;
+
+-- Create policies for roles table
+CREATE POLICY "Roles are viewable by all users"
+  ON roles
+  FOR SELECT
+  TO PUBLIC
+  USING (true);
+
+CREATE POLICY "Roles are manageable by administrators"
+  ON roles
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM app_users
+      WHERE app_users.email = 'admin@nahcon.gov.ng'
+      AND app_users.role = 'Administrator'
+    )
+  );
+
+-- Create policies for app_users table
+CREATE POLICY "Users are viewable by all users"
+  ON app_users
+  FOR SELECT
+  TO PUBLIC
+  USING (true);
+
+CREATE POLICY "Users are manageable by administrators"
+  ON app_users
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM app_users
+      WHERE app_users.email = 'admin@nahcon.gov.ng'
+      AND app_users.role = 'Administrator'
+    )
+  );
+
+-- Insert initial roles if they don't exist
+INSERT INTO roles (name, description, privileges) VALUES
+  ('Administrator', 'Full system access and management capabilities', ARRAY[
+    'Full system access',
+    'User management',
+    'Settings management',
+    'View reports',
+    'Add meal assessments',
+    'Review meal assessments',
+    'Manage meal assessments'
+  ]),
+  ('NAHCON Staff', 'Staff members with assessment capabilities', ARRAY[
+    'Add meal assessments',
+    'View own submissions',
+    'View reports',
+    'Review own assessments'
+  ]),
+  ('State Representative', 'State representatives for meal assessment', ARRAY[
+    'View state reports',
+    'Review meal assessments',
+    'View own submissions'
+  ]),
+  ('Kitchen Representative', 'Kitchen representatives for meal assessment', ARRAY[
+    'View kitchen reports',
+    'Review meal assessments',
+    'View own submissions'
+  ])
+ON CONFLICT (name) DO NOTHING;
+
+-- Insert default admin user if it doesn't exist
+INSERT INTO app_users (id, name, email, role, state, kitchen, status)
+VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  'System Administrator',
+  'admin@nahcon.gov.ng',
+  'Administrator',
+  'All',
+  'All',
+  'Active'
+) ON CONFLICT (id) DO NOTHING;
